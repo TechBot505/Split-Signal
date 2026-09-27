@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
+import { clerkAppearance } from "@/lib/clerk-appearance";
 import { AuthBridge } from "@/components/auth/AuthBridge";
 import { CloudSync } from "@/components/auth/CloudSync";
 import { StoreHydrator } from "@/components/shell/StoreHydrator";
@@ -17,7 +18,7 @@ const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
 export function Providers({ children }: { children: ReactNode }) {
   if (clerkKey) {
     return (
-      <ClerkProvider publishableKey={clerkKey}>
+      <ClerkProvider appearance={clerkAppearance} publishableKey={clerkKey}>
         <StoreHydrator />
         <AuthBridge />
         <CloudSync />

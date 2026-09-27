@@ -5,17 +5,8 @@ import { SignIn, SignUp } from "@clerk/nextjs";
 import { Wordmark } from "@/components/shell";
 import { Card } from "@/components/ui";
 import { isAuthEnabledClient } from "@/lib/env";
+import { clerkAppearance as appearance } from "@/lib/clerk-appearance";
 
-/** Clerk appearance mapped to the Split Signal design tokens. */
-const appearance = {
-  variables: {
-    colorPrimary: "#3CF2D6",
-    colorBackground: "#0E1217",
-    colorText: "#EAF2F7",
-    borderRadius: "10px",
-    fontFamily: "var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif",
-  },
-} as const;
 
 export interface AuthPanelProps {
   mode: "sign-in" | "sign-up";
