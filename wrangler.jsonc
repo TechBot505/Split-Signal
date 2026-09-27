@@ -20,6 +20,6 @@
   // override per-environment. REALTIME_SECRET is NOT here — set it via
   // `.dev.vars` locally or `wrangler secret put` in production.
   "vars": {
-    "NEXT_PUBLIC_APP_URL": ""
+    "NEXT_PUBLIC_APP_URL": "https://splitsignal.vercel.app"
   }
 }
