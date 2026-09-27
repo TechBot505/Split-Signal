@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Split Signal">
+  <rect width="512" height="512" rx="112" fill="#07090C" />
+  <!-- split circle: two overlapping signal arcs -->
+  <g fill="none" stroke-linecap="round">
+    <circle cx="256" cy="256" r="120" stroke="#151A21" stroke-width="10" />
+    <!-- left arc (muted) -->
+    <path d="M256 136 A120 120 0 0 0 256 376" stroke="#9AA7B4" stroke-width="22" />
+    <!-- right arc (accent) -->
+    <path d="M256 376 A120 120 0 0 0 256 136" stroke="#3CF2D6" stroke-width="22" />
+    <!-- signal ripples -->
+    <path d="M330 200 a70 70 0 0 1 0 112" stroke="#3CF2D6" stroke-width="14" opacity="0.9" />
+    <path d="M360 172 a112 112 0 0 1 0 168" stroke="#3CF2D6" stroke-width="12" opacity="0.45" />
+  </g>
+  <circle cx="256" cy="256" r="22" fill="#3CF2D6" />
+</svg>

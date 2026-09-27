@@ -1,0 +1,7 @@
+REALTIME_SECRET=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+# SEED_SALT — optional secret mixed into puzzle generation so clients can't
+# regenerate their partner's half from the open-source code + public daily seed.
+# Leave UNSET locally (the e2e bot regenerates stages without it); set it only in
+# production via `npx wrangler secret put SEED_SALT`.
+# SEED_SALT=

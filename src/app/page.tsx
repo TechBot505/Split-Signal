@@ -1,103 +1,118 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Dice5, Radio } from "lucide-react";
+import { AvatarBuilder } from "@/components/avatar";
+import { Wordmark } from "@/components/shell";
+import { Button, Input, Spinner } from "@/components/ui";
+import { randomAvatar, type AvatarConfig } from "@/lib/avatar";
+import { randomCallsign } from "@/lib/callsign";
+import { useProfileStore } from "@/lib/store/profile";
+import { useStoreHydrated } from "@/lib/store/useStoreHydrated";
+
+function FullScreenSpinner() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="grid min-h-dvh place-items-center">
+      <Spinner size={28} label="Loading" className="text-accent" />
+    </main>
+  );
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+/** Where to go once identity is set: honour ?next, then ?code, else the hub. */
+function destination(params: URLSearchParams): string {
+  const next = params.get("next");
+  if (next && next.startsWith("/")) return next;
+  const code = params.get("code");
+  return code ? `/play?code=${encodeURIComponent(code)}` : "/play";
+}
+
+function IdentityCreator() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const profile = useProfileStore((s) => s.profile);
+  const setIdentity = useProfileStore((s) => s.setIdentity);
+  const hydrated = useStoreHydrated();
+
+  const [checked, setChecked] = useState(false);
+  const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState<AvatarConfig>(() => randomAvatar("station"));
+  const dest = useMemo(() => destination(new URLSearchParams(params.toString())), [params]);
+
+  // No-flash gate: wait for rehydration, then either send returning operators
+  // straight to the hub or reveal the creator (with a freshly random avatar).
+  useEffect(() => {
+    if (!hydrated) return;
+    if (profile && profile.name.trim().length > 0) {
+      router.replace(dest);
+    } else {
+      setAvatar(randomAvatar());
+      setChecked(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
+  if (!checked) return <FullScreenSpinner />;
+
+  const trimmed = name.trim();
+  const valid = trimmed.length >= 1 && trimmed.length <= 16;
+
+  const enter = () => {
+    if (!valid) return;
+    setIdentity(trimmed, avatar);
+    router.replace(dest);
+  };
+
+  return (
+    <main className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col px-5 pt-[max(24px,env(safe-area-inset-top))]">
+      <div className="flex flex-1 flex-col gap-6 pb-28">
+        <header className="flex flex-col items-center gap-3 pt-4 text-center">
+          <Wordmark className="text-2xl" />
+          <span className="label-mono text-accent">Choose your call-sign</span>
+        </header>
+
+        <AvatarBuilder value={avatar} onChange={setAvatar} />
+
+        <div className="flex flex-col gap-2">
+          <Input
+            label="Call sign"
+            name="callsign"
+            value={name}
+            maxLength={16}
+            leftIcon={<Radio size={16} />}
+            placeholder="Echo Fox"
+            autoComplete="off"
+            onChange={(e) => setName(e.target.value.slice(0, 16))}
+            onKeyDown={(e) => e.key === "Enter" && enter()}
+            hint={`${trimmed.length}/16`}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<Dice5 size={15} />}
+            onClick={() => setName(randomCallsign())}
+            className="self-start"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Surprise me
+          </Button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 border-t border-hairline bg-canvas/85 backdrop-blur-md">
+        <div className="mx-auto w-full max-w-[480px] px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+          <Button fullWidth size="lg" disabled={!valid} onClick={enter}>
+            Enter
+          </Button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default function IdentityPage() {
+  return (
+    <Suspense fallback={<FullScreenSpinner />}>
+      <IdentityCreator />
+    </Suspense>
   );
 }

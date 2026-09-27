@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "splitsignal",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-09-01",
+  "observability": { "enabled": true },
+  // Durable Object hosting the realtime bunker room. Binding name "main" keeps
+  // the client route as /parties/main/<code> (routePartykitRequest kebab-cases
+  // the binding name).
+  "durable_objects": {
+    "bindings": [
+      { "name": "main", "class_name": "SplitSignalRoom" }
+    ]
+  },
+  // SQLite-backed Durable Objects (available on the Workers Free plan).
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["SplitSignalRoom"] }
+  ],
+  // Public app origin the server POSTs finished runs to. Empty by default;
+  // override per-environment. REALTIME_SECRET is NOT here — set it via
+  // `.dev.vars` locally or `wrangler secret put` in production.
+  "vars": {
+    "NEXT_PUBLIC_APP_URL": ""
+  }
+}
